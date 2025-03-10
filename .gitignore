@@ -35,3 +35,4 @@ build/
 .coverage
 htmlcov/
 venv
+.env

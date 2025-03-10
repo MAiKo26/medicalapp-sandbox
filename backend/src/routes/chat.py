@@ -1,6 +1,6 @@
 from fastapi import APIRouter,WebSocket, WebSocketDisconnect, Request
-from config.ConnectionManager import ConnectionManager
-from config.BotManager import BotManager
+from src.services.bot_service import BotManager
+from src.services.websocket_service import ConnectionManager
 import json
 
 manager = ConnectionManager()

@@ -1,25 +1,30 @@
-import { AppSidebar } from "@/components/app-sidebar";
-import { ModeToggle } from "@/components/ModeToggle";
-import { Separator } from "@/components/ui/separator";
+import { Outlet } from "react-router";
 import {
   SidebarInset,
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
-import { Outlet } from "react-router";
+import { AppSidebar } from "@/components/sidebar-app";
+import { Separator } from "@/components/ui/separator";
+import { LogOut } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { logout } from "@/lib/logout";
+import { ModeToggle } from "@/components/mode-toggle";
 
-function ChatLayout() {
+function SidebarLayout() {
   return (
     <SidebarProvider>
       <AppSidebar />
       <SidebarInset>
         <header className="flex h-14 items-center gap-4 border-b bg-background px-6 lg:h-[60px]">
-          <SidebarTrigger className="dark:text-black" />
+          <SidebarTrigger className="bg-background" />
           <Separator orientation="vertical" className="h-6" />
-          <div className="flex flex-1 justify-between">
-            <span className="text-lg font-semibold">MedicalChatBot</span>
+          <div className="flex flex-1 justify-end">
             <span className="flex gap-2">
               <ModeToggle />
+              <Button onClick={() => logout()}>
+                <LogOut />
+              </Button>
             </span>
           </div>
         </header>
@@ -30,4 +35,4 @@ function ChatLayout() {
     </SidebarProvider>
   );
 }
-export default ChatLayout;
+export default SidebarLayout;

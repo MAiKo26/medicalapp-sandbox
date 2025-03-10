@@ -1,27 +1,28 @@
-import { useEffect, useState } from "react";
-import { Bot, Ellipsis, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Send } from "lucide-react";
+import { useEffect, useState } from "react";
+import useStore from "@/store/AppStore";
 import { toast } from "@/hooks/use-toast";
-import useStore from "../store/usernamestore";
 
 interface Message {
   sender: string;
   content: string;
 }
 
-export default function BotChat() {
+export default function Chat() {
   const { username } = useStore();
   const [messageInput, setMessageInput] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
   const [isSending, setIsSending] = useState(false);
-
   const [ws, setWs] = useState<WebSocket | null>(null);
 
   useEffect(() => {
-    const socket = new WebSocket(`ws://localhost:8000/ws/chat/bot/${username}`);
+    const socket = new WebSocket(
+      `ws://localhost:8000/ws/chat/general/${username}`,
+    );
 
     socket.onopen = () => {
       console.log("WebSocket connection opened");
@@ -52,6 +53,7 @@ export default function BotChat() {
 
     try {
       setIsSending(true);
+
       ws.send(messageInput);
       setMessageInput("");
     } catch (error) {
@@ -75,7 +77,7 @@ export default function BotChat() {
   return (
     <Card className="h-[calc(100vh-2rem)]">
       <CardHeader>
-        <CardTitle>Bot Chat</CardTitle>
+        <CardTitle>General Chat</CardTitle>
       </CardHeader>
       <CardContent className="flex h-[calc(100%-8rem)] flex-col gap-4">
         <ScrollArea className="flex-1 rounded-lg border p-4">
@@ -97,7 +99,7 @@ export default function BotChat() {
                   <div className="flex items-center gap-2">
                     {message.sender !== username && (
                       <span className="flex gap-1 font-semibold">
-                        <Bot /> {message.sender}
+                        {message.sender}
                       </span>
                     )}
                     <span className="text-xs text-muted-foreground">
@@ -108,7 +110,6 @@ export default function BotChat() {
                 </div>
               </div>
             ))}
-            <Ellipsis className="h-6 w-6 animate-bounce" />
           </div>
         </ScrollArea>
 

@@ -16,10 +16,10 @@ export function NotFound() {
             home page.{" "}
           </p>
           <Link
-            to="/chat/general"
+            to="/dashboard"
             className="my-4 inline-flex rounded-lg bg-slate-600 px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-slate-800 focus:outline-none focus:ring-4 focus:ring-slate-300 dark:focus:ring-slate-900"
           >
-            Back to General Chat
+            Back to Dashboard
           </Link>
         </div>
       </div>
