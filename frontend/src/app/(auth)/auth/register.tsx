@@ -1,6 +1,3 @@
-import { useForm } from "react-hook-form";
-import * as z from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -19,9 +16,12 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Link } from "react-router";
+import { env } from "@/config/env";
 import { toast } from "@/hooks/use-toast";
-import { api } from "@/constants/api-value";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { Link } from "react-router";
+import * as z from "zod";
 
 const formSchema = z.object({
   fullname: z
@@ -46,8 +46,9 @@ export default function RegisterPage() {
     try {
       console.log("Form values:", values);
 
-      const response = await fetch(`${api}/auth/register`, {
+      const response = await fetch(`${env.VITE_API_URL}/auth/register`, {
         method: "POST",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
         },
@@ -78,7 +79,7 @@ export default function RegisterPage() {
     <div className="flex min-h-screen items-center justify-center">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle>Register to NobleMind Sandbox</CardTitle>
+          <CardTitle>Register to MedicalApp Sandbox</CardTitle>
           <CardDescription>
             Enter your credentials to create your account
           </CardDescription>

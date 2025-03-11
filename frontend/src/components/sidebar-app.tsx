@@ -9,10 +9,12 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { api } from "@/constants/api-value";
+import { env } from "@/config/env";
+
 import { User } from "@/interfaces/user-interface";
 import {
   BotMessageSquare,
+  BrainCircuitIcon,
   Home,
   MessageCircleMore,
   Settings,
@@ -29,6 +31,7 @@ const navigation = [
     icon: MessageCircleMore,
   },
   { name: "Bot Chat", href: "/dashboard/chat/bot", icon: BotMessageSquare },
+  { name: "AI Chat", href: "/dashboard/chat/ai", icon: BrainCircuitIcon },
   { name: "Settings", href: "/dashboard/settings", icon: Settings },
 ];
 
@@ -36,17 +39,11 @@ export function AppSidebar() {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-
-    if (!token) {
-      window.location.href = "/auth/login";
-      return;
-    }
-
     const fetchUser = async () => {
       try {
-        const response = await fetch(`${api}/auth/me?token=${token}`, {
+        const response = await fetch(`${env.VITE_API_URL}/auth/me`, {
           method: "GET",
+          credentials: "include",
         });
 
         if (!response.ok) {
@@ -57,12 +54,10 @@ export function AppSidebar() {
         setCurrentUser(user);
 
         if (!user) {
-          localStorage.removeItem("token");
           window.location.href = "/auth/login";
         }
       } catch (error) {
         console.error("Error fetching user:", error);
-        localStorage.removeItem("token");
         window.location.href = "/auth/login";
       }
     };
@@ -74,7 +69,7 @@ export function AppSidebar() {
       <SidebarHeader>
         <div className="flex items-center gap-2 px-4 py-2">
           <img src="/favicon.svg" className="h-6 w-6" />
-          <span className="font-semibold">NobleMind SandBox</span>
+          <span className="font-semibold">MedicalApp SandBox</span>
         </div>
       </SidebarHeader>
       <SidebarContent>

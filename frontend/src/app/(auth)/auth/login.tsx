@@ -21,7 +21,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Link, useNavigate } from "react-router";
 import { toast } from "@/hooks/use-toast";
-import { api } from "@/constants/api-value";
+import { env } from "@/config/env";
 
 const formSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -42,8 +42,9 @@ export default function LoginPage() {
     try {
       console.log("Login attempt:", values);
 
-      const response = await fetch(`${api}/auth/login`, {
+      const response = await fetch(`${env.VITE_API_URL}/auth/login`, {
         method: "POST",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
         },
@@ -64,10 +65,6 @@ export default function LoginPage() {
         description: "Welcome back!",
       });
 
-      const data = await response.json();
-
-      localStorage.setItem("token", data.token);
-
       navigate("/dashboard");
     } catch (error) {
       console.error("Login error:", error);
@@ -81,7 +78,7 @@ export default function LoginPage() {
     <div className="flex min-h-screen items-center justify-center">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle>Login to My NobleMind Sandbox</CardTitle>
+          <CardTitle>Login to My MedicalApp Sandbox</CardTitle>
           <CardDescription>
             Enter your credentials to access your account
           </CardDescription>

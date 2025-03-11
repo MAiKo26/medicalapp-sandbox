@@ -26,7 +26,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { User } from "@/interfaces/user-interface";
-import { api } from "@/constants/api-value";
+import { env } from "@/config/env";
+
 import { toast } from "@/hooks/use-toast";
 
 export default function AdminDashboard() {
@@ -41,7 +42,7 @@ export default function AdminDashboard() {
   const [users, setUsers] = useState<User[]>([]);
   useEffect(() => {
     const fetchUsers = async () => {
-      const response = await fetch(`${api}/users`);
+      const response = await fetch(`${env.VITE_API_URL}/users`);
 
       const data = await response.json();
       console.log(data);
@@ -71,8 +72,9 @@ export default function AdminDashboard() {
     try {
       console.log("Form values:", newUser);
 
-      const response = await fetch(`${api}/auth/register`, {
+      const response = await fetch(`${env.VITE_API_URL}/auth/register`, {
         method: "POST",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
         },
@@ -95,8 +97,9 @@ export default function AdminDashboard() {
 
   const handleDeleteUser = async (email: string) => {
     try {
-      const response = await fetch(`${api}/users/${email}`, {
+      const response = await fetch(`${env.VITE_API_URL}/users/${email}`, {
         method: "DELETE",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
         },

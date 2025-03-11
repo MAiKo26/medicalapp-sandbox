@@ -25,7 +25,6 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { data } from "@/constants/place-holder-data";
-import { logOut } from "@/lib/auth-repo";
 import { Link } from "react-router";
 
 export function NavUser({
@@ -43,7 +42,7 @@ export function NavUser({
           <DropdownMenuTrigger asChild>
             <SidebarMenuButton
               size="lg"
-              className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+              className="bg-sidebar data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
               <Avatar className="h-8 w-8 rounded-lg">
                 <AvatarImage src={avatar} alt={name} />
@@ -122,7 +121,7 @@ export function NavUser({
               )}
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => logOut()}>
+            <DropdownMenuItem>
               <LogOut />
               Log out
             </DropdownMenuItem>

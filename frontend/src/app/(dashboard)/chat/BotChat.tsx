@@ -5,7 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "@/hooks/use-toast";
-import useStore from "@/store/AppStore";
+import useStore from "@/config/app-store";
+import { env } from "@/config/env";
 
 interface Message {
   sender: string;
@@ -21,7 +22,9 @@ export default function BotChat() {
   const [ws, setWs] = useState<WebSocket | null>(null);
 
   useEffect(() => {
-    const socket = new WebSocket(`ws://localhost:8000/ws/chat/bot/${username}`);
+    const socket = new WebSocket(
+      `${env.VITE_API_URL.replace("http", "ws")}/ws/chat/bot/${username}`,
+    );
 
     socket.onopen = () => {
       console.log("WebSocket connection opened");
