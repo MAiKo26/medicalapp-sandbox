@@ -36,3 +36,5 @@ build/
 htmlcov/
 venv
 .env
+frontend/.env
+backend/.env

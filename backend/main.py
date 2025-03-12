@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi import APIRouter
-from src.routes import chat,auth,users
+from src.routes import chat,auth,users,ai
 from fastapi.middleware.cors import CORSMiddleware
 
 
@@ -33,5 +33,6 @@ v1_router = APIRouter(prefix="/api/v1")
 v1_router.include_router(chat.router)
 v1_router.include_router(users.router)
 v1_router.include_router(auth.router)
+v1_router.include_router(ai.router)
 
 app.include_router(v1_router);
