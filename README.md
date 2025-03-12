@@ -1,6 +1,6 @@
-# Chat Application with FastAPI and React
+# Sandbox Application with FastAPI and React
 
-A real-time chat application built using FastAPI (Python) for the backend and React for the frontend, utilizing WebSocket for bidirectional communication.
+A Sandbox application to test stuff like webscoket, auth , ai intergartion etc ... built using FastAPI (Python) for the backend and React for the frontend, utilizing WebSocket for bidirectional communication.
 
 ## Features
 
