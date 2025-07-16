@@ -1,3 +1,4 @@
+import uuid
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Request, HTTPException
 from fastapi.responses import StreamingResponse
 from src.services.bot_service import BotManager
@@ -70,149 +71,112 @@ async def chat_endpoint(chat_request: ChatRequest):
 
 @router.post("/custom-ai-chat-protocol-data")
 async def chat_data_stream_endpoint():
-    async def generate_data_stream():
-        # Simulate processing time / streaming delay
-        delay = 0.05 # Reduced delay for faster example
+        async def generate_data_stream():
+            delay = 0.05  # Streaming delay for simulation
+            message_id = str(uuid.uuid4())
 
-        print("Starting data stream...")
+            # Message Start Part
+            yield f'data:{json.dumps({"type":"start","messageId": message_id})}\n\n'
+            await asyncio.sleep(delay)
 
-        # Each yield must be a complete SSE 'data:' line followed by two newlines
-        # The Vercel AI SDK expects a *JSON string* as the data payload, not just a string,
-        # which it then decodes and processes based on the prefix.
+            # Text Block 1
+            text_id1 = str(uuid.uuid4())
+            yield f'data:{json.dumps({"type":"text-start","id": text_id1})}\n\n'
+            await asyncio.sleep(delay)
+            yield f'data:{json.dumps({"type":"text-delta","id": text_id1,"delta":"Hello!"})}\n\n'
+            await asyncio.sleep(delay)
+            yield f'data:{json.dumps({"type":"text-delta","id": text_id1,"delta":" This is the initial text. "})}\n\n'
+            await asyncio.sleep(delay)
+            yield f'data:{json.dumps({"type":"text-end","id": text_id1})}\n\n'
+            await asyncio.sleep(delay)
 
-        # Corrected: Type prefix (e.g., '0:') is *inside* the JSON string
-        # and the JSON string is the *value* of the data: field.
-        # So the format is data:JSON_STRING_OF_PAYLOAD\n\n
-        # The payload itself is then like {"type": "text", "text": "..."}
+            # Text Block 2
+            text_id2 = str(uuid.uuid4())
+            yield f'data:{json.dumps({"type":"text-start","id": text_id2})}\n\n'
+            await asyncio.sleep(delay)
+            yield f'data:{json.dumps({"type":"text-delta","id": text_id2,"delta":"Here is some more text."})}\n\n'
+            await asyncio.sleep(delay)
+            yield f'data:{json.dumps({"type":"text-end","id": text_id2})}\n\n'
+            await asyncio.sleep(delay)
 
-        # 0: Text Part (UIMessageStreamPart of type 'text')
-        # The value associated with 'text' is the text content itself (string)
-        # Note: The '0:' prefix in your previous example was part of a custom protocol,
-        # but the AI SDK expects a 'type' field within the JSON for standard parts.
-        # If your client-side `index.js` specifically uses `type: "text"` from the JSON,
-        # then you should send a JSON object like `{"type": "text", "text": "..."}`
-        # The client-side `uiMessageStreamPartSchema` and `processUIMessageStream`
-        # in `index.js` confirm the expectation of `{"type": "text", "text": "..."}`.
-        yield f'data:{json.dumps({"type": "text", "text": "Hello! This is the initial text. ","id":"0"})}\n\n'
-        await asyncio.sleep(delay)
-        yield f'data:{json.dumps({"type": "text", "text": "Here is some more text.", "id":"1"})}\n\n'
-        await asyncio.sleep(delay)
+            # Start Step Part
+            yield f'data:{json.dumps({"type":"start-step"})}\n\n'
+            await asyncio.sleep(delay)
 
-        # f: Start Step Part (type: "start-step")
-        yield f'data:{json.dumps({"type": "start-step", "messageId": "step-1"})}\n\n'
-        await asyncio.sleep(delay)
+            # Reasoning Block
+            reasoning_id = str(uuid.uuid4())
+            yield f'data:{json.dumps({"type":"reasoning-start","id": reasoning_id})}\n\n'
+            await asyncio.sleep(delay)
+            yield f'data:{json.dumps({"type":"reasoning-delta","id": reasoning_id,"delta":"Okay, planning the first step..."})}\n\n'
+            await asyncio.sleep(delay)
+            yield f'data:{json.dumps({"type":"reasoning-delta","id": reasoning_id,"delta":" I will now search for relevant information."})}\n\n'
+            await asyncio.sleep(delay)
+            yield f'data:{json.dumps({"type":"reasoning-end","id": reasoning_id})}\n\n'
+            await asyncio.sleep(delay)
 
-        # g: Reasoning Part (type: "reasoning")
-        yield f'data:{json.dumps({"type": "reasoning", "text": "Okay"})}\n\n'
-        await asyncio.sleep(delay)
-        yield f'data:{json.dumps({"type": "reasoning", "text": "planning"})}\n\n'
-        await asyncio.sleep(delay)
-        yield f'data:{json.dumps({"type": "reasoning", "text": "the"})}\n\n'
-        await asyncio.sleep(delay)
-        yield f'data:{json.dumps({"type": "reasoning", "text": "first"})}\n\n'
-        await asyncio.sleep(delay)
-        yield f'data:{json.dumps({"type": "reasoning", "text": "step..."})}\n\n'
-        await asyncio.sleep(delay)
-        yield f'data:{json.dumps({"type": "reasoning", "text": " I will now search for relevant information."})}\n\n'
-        await asyncio.sleep(delay)
+            # Text Block 3
+            text_id3 = str(uuid.uuid4())
+            yield f'data:{json.dumps({"type":"text-start","id": text_id3})}\n\n'
+            await asyncio.sleep(delay)
+            yield f'data:{json.dumps({"type":"text-delta","id": text_id3,"delta":"Here is 2 some more text."})}\n\n'
+            await asyncio.sleep(delay)
+            yield f'data:{json.dumps({"type":"text-end","id": text_id3})}\n\n'
+            await asyncio.sleep(delay)
 
-        yield f'data:{json.dumps({"type": "text", "text": "Here is 2 some more text.","id":"ABC"})}\n\n'
-        await asyncio.sleep(delay)
+            # Source URL Part
+            yield f'data:{json.dumps({"type":"source-url","sourceId":"src-1","url":"https://vercel.com/docs"})}\n\n'
+            await asyncio.sleep(delay)
 
+            # File Part (using URL instead of base64 content)
+            yield f'data:{json.dumps({"type":"file","url":"https://example.com/file.txt","mediaType":"text/plain"})}\n\n'
+            await asyncio.sleep(delay)
 
-        # 8: Message Annotation Part (type: "message-annotation")
-        yield f'data:{json.dumps({"type": "data-annotation", "data": [{"type": "citation", "id": "anno-1", "text": "Source [1]", "details": {"sourceId": "src-1"}}]})}\n\n'
-        yield f'data:{json.dumps({"type": "data-annotation", "data": [{"type": "citation", "id": "anno-2", "text": "Another Source [2]", "details": {"sourceId": "src-2"}}]})}\n\n'
-        await asyncio.sleep(delay)
+            # Data Parts with custom types
+            yield f'data:{json.dumps({"type":"data-search-status","data":{"status":"Searching...","query":1}})}\n\n'
+            await asyncio.sleep(delay)
+            yield f'data:{json.dumps({"type":"data-search-results","data":{"results_found":5}})}\n\n'
+            await asyncio.sleep(delay)
 
-        # i: Redacted Reasoning Part (type: "redacted-reasoning")
-        yield f'data:{json.dumps({"type": "redacted-reasoning", "redactedtext": "[REDACTED: Potentially sensitive internal thought process]"})}\n\n'
-        await asyncio.sleep(delay)
+            # Error Part
+            yield f'data:{json.dumps({"type":"error","errorText":"Encountered a minor issue during search, but continuing."})}\n\n'
+            await asyncio.sleep(delay)
 
-        # j: Reasoning Signature Part (type: "reasoning-signature")
-        yield f'data:{json.dumps({"type": "reasoning-signature", "signature": "sig_aBcDeF12345"})}\n\n'
-        await asyncio.sleep(delay)
+            # Streaming Tool Call
+            tool_call_id_stream = "call_stream_weather_123"
+            tool_name_stream = "get_current_weather_streaming"
+            yield f'data:{json.dumps({"type":"tool-input-start","toolCallId":tool_call_id_stream,"toolName":tool_name_stream})}\n\n'
+            await asyncio.sleep(delay)
+            yield f'data:{json.dumps({"type":"tool-input-delta","toolCallId":tool_call_id_stream,"inputTextDelta":"{\"location\": "})}\n\n'
+            await asyncio.sleep(0.1)
+            yield f'data:{json.dumps({"type":"tool-input-delta","toolCallId":tool_call_id_stream,"inputTextDelta":"\"Tunis, TN\"}"})}\n\n'
+            await asyncio.sleep(0.1)
+            yield f'data:{json.dumps({"type":"tool-input-available","toolCallId":tool_call_id_stream,"toolName":tool_name_stream,"input":{"location":"Tunis, TN"}})}\n\n'
+            await asyncio.sleep(delay)
+            yield f'data:{json.dumps({"type":"tool-output-available","toolCallId":tool_call_id_stream,"output":{"temperature":"25C","condition":"Sunny"}})}\n\n'
+            await asyncio.sleep(delay)
 
+            # Non-Streaming Tool Call
+            tool_call_id_nonstream = "call_nonstream_user_456"
+            tool_name_nonstream = "lookup_user_info"
+            yield f'data:{json.dumps({"type":"tool-input-available","toolCallId":tool_call_id_nonstream,"toolName":tool_name_nonstream,"input":{"user_id":"usr_abc"}})}\n\n'
+            await asyncio.sleep(delay)
+            yield f'data:{json.dumps({"type":"tool-output-available","toolCallId":tool_call_id_nonstream,"output":{"name":"John Doe","status":"Active"}})}\n\n'
+            await asyncio.sleep(delay)
 
+            # Finish Step Part
+            yield f'data:{json.dumps({"type":"finish-step","finishReason":"tool-calls","usage":{"promptTokens":50,"completionTokens":75},"isContinued":False})}\n\n'
+            await asyncio.sleep(delay)
 
-        # h: Source Part (type: "source")
-        yield f'data:{json.dumps({"type": "source", "id": "src-1", "sourceType": "url", "url": "https://vercel.com/docs", "title": "Vercel Documentation"})}\n\n'
-        await asyncio.sleep(delay)
-        yield f'data:{json.dumps({"type": "source", "id": "src-2", "sourceType": "text", "content": "Internal knowledge base article #42"})}\n\n'
-        await asyncio.sleep(delay)
+            # Finish Message Part and Stream Termination
+            yield f'data:{json.dumps({"type":"finish"})}\n\n'
+            yield 'data: [DONE]\n\n'
 
-        # k: File Part (type: "file-part")
-        file_content = "This is the content of the file."
-        file_data_base64 = base64.b64encode(file_content.encode('utf-8')).decode('utf-8')
-        yield f'data:{json.dumps({"type": "file-part", "data": file_data_base64, "mimeType": "text/plain;charset=utf-8"})}\n\n'
-        await asyncio.sleep(delay)
-
-        # 2: Data Part (type: "data") - Arbitrary JSON data
-        yield f'data:{json.dumps({"type": "data", "data": [{"status": "Searching..."}, {"query": 1}]})}\n\n'
-        await asyncio.sleep(delay)
-        yield f'data:{json.dumps({"type": "data", "data": [{"results_found": 5}]})}\n\n'
-        await asyncio.sleep(delay)
-
-        # 3: Error Part (type: "error")
-        yield f'data:{json.dumps({"type": "error", "errorText": "Encountered a minor issue during search, but continuing."})}\n\n'
-        await asyncio.sleep(delay)
-
-        # ---- Tool Call Example (Streaming) ----
-        tool_call_id_stream = "call_stream_weather_123"
-        tool_name_stream = "get_current_weather_streaming"
-        # b: Tool Call Streaming Start Part (type: "tool-call-streaming-start")
-        yield f'data:{json.dumps({"type": "tool-call-streaming-start", "toolCallId": tool_call_id_stream, "toolName": tool_name_stream})}\n\n'
-        await asyncio.sleep(delay)
-        # c: Tool Call Delta Part(s) (type: "tool-call-delta")
-        yield f'data:{json.dumps({"type": "tool-call-delta", "toolCallId": tool_call_id_stream, "argsTextDelta": '{"loc'})}\n\n'
-        await asyncio.sleep(0.1)
-        yield f'data:{json.dumps({"type": "tool-call-delta", "toolCallId": tool_call_id_stream, "argsTextDelta": 'ation"'})}\n\n'
-        await asyncio.sleep(0.1)
-        yield f'data:{json.dumps({"type": "tool-call-delta", "toolCallId": tool_call_id_stream, "argsTextDelta": ': "Tun'})}\n\n'
-        await asyncio.sleep(0.1)
-        yield f'data:{json.dumps({"type": "tool-call-delta", "toolCallId": tool_call_id_stream, "argsTextDelta": 'is, '})}\n\n'
-        await asyncio.sleep(0.1)
-        yield f'data:{json.dumps({"type": "tool-call-delta", "toolCallId": tool_call_id_stream, "argsTextDelta": 'TN"}'})}\n\n'
-        await asyncio.sleep(delay)
-        # 9: Tool Call Part (type: "tool-call") - Needs to come *after* streaming deltas for the same call
-        yield f'data:{json.dumps({"type": "tool-call", "toolCallId": tool_call_id_stream, "toolName": tool_name_stream, "args": {"location": "Tunis, TN"}})}\n\n'
-        await asyncio.sleep(delay)
-        # a: Tool Result Part (type: "tool-result")
-        yield f'data:{json.dumps({"type": "tool-result", "toolCallId": tool_call_id_stream, "result": {"temperature": "25C", "condition": "Sunny"}})}\n\n'
-        await asyncio.sleep(delay)
-        # ---- End Tool Call Example (Streaming) ----
-
-        # ---- Tool Call Example (Non-Streaming) ----
-        tool_call_id_nonstream = "call_nonstream_user_456"
-        tool_name_nonstream = "lookup_user_info"
-        # 9: Tool Call Part (type: "tool-call") - Sent directly
-        yield f'data:{json.dumps({"type": "tool-call", "toolCallId": tool_call_id_nonstream, "toolName": tool_name_nonstream, "args": {"user_id": "usr_abc"}})}\n\n'
-        await asyncio.sleep(delay)
-        # a: Tool Result Part (type: "tool-result")
-        yield f'data:{json.dumps({"type": "tool-result", "toolCallId": tool_call_id_nonstream, "result": {"name": "John Doe", "status": "Active"}})}\n\n'
-        await asyncio.sleep(delay)
-        # ---- End Tool Call Example (Non-Streaming) ----
-
-        # e: Finish Step Part (type: "finish-step")
-        yield f'data:{json.dumps({"type": "finish-step", "finishReason": "tool-calls", "usage": {"promptTokens": 50, "completionTokens": 75}, "isContinued": False})}\n\n'
-        await asyncio.sleep(delay)
-
-        # Optionally start another step if needed
-        # yield f'data:{json.dumps({"type": "start-step", "messageId": "step-2"})}\n\n'
-        # ... more parts ...
-        # yield f'data:{json.dumps({"type": "finish-step", "finishReason": "stop", "usage": {"promptTokens": 10, "completionTokens": 20}, "isContinued": False})}\n\n'
-
-        # d: Finish Message Part (type: "finish-message") - MUST be the absolute last part
-        final_usage = {"promptTokens": 50, "completionTokens": 75} # Example, sum up usage from all 'e' parts if applicable
-        yield f'data:{json.dumps({"type": "finish-message", "finishReason": "stop", "usage": final_usage})}\n\n'
-        # --- Stream ENDS here ---
-
-    return StreamingResponse(
-        generate_data_stream(),
-        media_type="text/event-stream", # CRUCIAL: Set to text/event-stream
-        headers={
-            'X-Vercel-AI-Data-Stream': 'v1', # CRUCIAL: Header for the SDK
-            'Cache-Control': 'no-cache',     # Recommended for SSE
-            'Connection': 'keep-alive'       # Recommended for SSE
-        }
-    )
+        return StreamingResponse(
+            generate_data_stream(),
+            media_type="text/event-stream",
+            headers={
+                'x-vercel-ai-ui-message-stream': 'v1',
+                'Cache-Control': 'no-cache',
+                'Connection': 'keep-alive'
+            }
+        )
