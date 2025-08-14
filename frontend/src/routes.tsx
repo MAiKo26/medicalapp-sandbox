@@ -11,6 +11,7 @@ import SidebarLayout from "@/layouts/sidebar-layout";
 import { BrowserRouter, Route, Routes } from "react-router";
 import AiChat from "./app/(dashboard)/chat/ai-chat";
 import FileReport from "./app/(dashboard)/dashboard/report-file";
+import AiChat2 from "@/app/(dashboard)/chat/ai-chat-2";
 
 function App() {
   return (
@@ -24,6 +25,7 @@ function App() {
               <Route path="general" element={<Chat />} />
               <Route path="bot" element={<BotChat />} />
               <Route path="ai" element={<AiChat />} />
+              <Route path="ai-2" element={<AiChat2 />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Route>
